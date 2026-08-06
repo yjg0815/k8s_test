@@ -1,0 +1,63 @@
+services: # 여러개의 서비스(컨테이너)를 정의하고 서로 통신하게 묶어줌
+
+  oracle:
+    image: gvenzl/oracle-free:23-slim-faststart # oracle 23c free 버전 slim-faststart 이미지 사용
+    container_name: inspien-oracle
+    environment:
+      ORACLE_PASSWORD: LocalDemo_Sys1
+      APP_USER: DEMOUSER
+      APP_USER_PASSWORD: LocalDemo_App1
+    ports:
+      - "1521:1521" # 호스트 1521 포트 -> 컨테이너 1521 포트 매핑
+    volumes: # local init 폴더를 컨테이너의 /container-entrypoint-initdb.d 폴더에 읽기 전용으로 마운트 -> 오라클 컨테이너 시작 시 init 폴더의 스크립트 실행
+      - ./init:/container-entrypoint-initdb.d:ro
+    healthcheck: # DB가 응답 가능한 상태인지 확인하는 헬스체크 설정
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  ftp:
+    image: delfer/alpine-ftp-server # 가벼운 vsftpd 기반 alpine ftp 서버 이미지 사용
+    container_name: inspien-ftp
+    environment:
+      USERS: "demoftp|demoftp123|/home/demoftp" # FTP로그인 계정명|비밀번호|홈디렉토리
+      # ADDRESS 미지정: app 컨테이너도 같은 compose 네트워크에 있어서
+      # PASV 응답에 담기는 ftp 컨테이너의 내부 브릿지 IP로 바로 접근 가능. 
+      # (actv : cli 포트 개방, serv->cli로 연결시도) , (pasv : cli가 serv에 포트 개방 요청 후 cli가 serv에 연결)
+      # 컨테이너/클라우드 환경에서는 대부분 pasv 모드 
+      # (호스트에서 별도 FTP 클라이언트로 접속할 계획이면 그때 host IP로 추가)
+      # vsftpd(very secure FTP daemon) : 리눅스용 FTP 서버 프로그램
+      # vsftpd에서는 접속한 컨테이너의 IP를 그대로 응답에 활용 (app->ftp compose 내부 같은 네트워크라서 문제 x)
+      # 만약 FTP서버가 공개 서버라 공유기/NAT 뒤에 있으면 PASV 응답에 담기는 IP가 공유기 내부 IP라서 외부에서 접속 불가 
+      # -> FTP서버 설정에서 PASV_ADDRESS를 공유기 공인IP로 지정해야 함
+      MIN_PORT: 21000
+      MAX_PORT: 21010
+    ports: # 제어용 포트 21, 데이터 전송용 포트 21000~21010 매핑 -> 둘 다 있어야 업/다운로드가 가능 
+      - "21:21"
+      - "21000-21010:21000-21010"
+
+  app:
+    build: . # Dockerfile이 있는 현재 디렉토리에서 빌드
+    container_name: inspien-app
+    depends_on:
+      oracle:
+        condition: service_healthy # healthcheck가 통과되어야 app 컨테이너 시작
+      ftp:
+        condition: service_started # ftp 컨테이너가 시작되어야 app 컨테이너 시작
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      EAI_DB_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
+      EAI_DB_USERNAME: DEMOUSER
+      EAI_DB_PASSWORD: LocalDemo_App1
+      EAI_FTP_HOST: ftp
+      EAI_FTP_PORT: "21"
+      EAI_FTP_USERNAME: demoftp
+      EAI_FTP_PASSWORD: demoftp123
+      EAI_FTP_PATH: /home/demoftp
+      EAI_APPLICANT_KEY: DEMO001
+      EAI_APPLICANT_NAME: 진경
+      EAI_APPLICANT_PHONE: "010-0000-0000"
+    ports:
+      - "8080:8080"

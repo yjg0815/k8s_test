@@ -1,0 +1,7 @@
+# src/main/resources/application-demo.yaml 로 복사
+# 원본 application.yaml은 그대로 두고, SPRING_PROFILES_ACTIVE=demo 로 이 값만 덮어씀
+# 발표 중 5분(200000ms) 대기하지 않도록 배치 주기만 단축
+
+eai:
+  batch:
+    shipment-interval-ms: 15000
