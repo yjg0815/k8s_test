@@ -38,26 +38,26 @@ services: # 여러개의 서비스(컨테이너)를 정의하고 서로 통신�
       - "21:21"
       - "21000-21010:21000-21010"
 
-  app:
-    build: . # Dockerfile이 있는 현재 디렉토리에서 빌드
-    container_name: inspien-app
-    depends_on:
-      oracle:
-        condition: service_healthy # healthcheck가 통과되어야 app 컨테이너 시작
-      ftp:
-        condition: service_started # ftp 컨테이너가 시작되어야 app 컨테이너 시작
-    environment:
-      SPRING_PROFILES_ACTIVE: demo
-      EAI_DB_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
-      EAI_DB_USERNAME: DEMOUSER
-      EAI_DB_PASSWORD: LocalDemo_App1
-      EAI_FTP_HOST: ftp
-      EAI_FTP_PORT: "21"
-      EAI_FTP_USERNAME: demoftp
-      EAI_FTP_PASSWORD: demoftp123
-      EAI_FTP_PATH: /home/demoftp
-      EAI_APPLICANT_KEY: DEMO001
-      EAI_APPLICANT_NAME: 진경
-      EAI_APPLICANT_PHONE: "010-0000-0000"
-    ports:
-      - "8080:8080"
+  # app:
+  #   build: . # Dockerfile이 있는 현재 디렉토리에서 빌드
+  #   container_name: inspien-app
+  #   depends_on:
+  #     oracle:
+  #       condition: service_healthy # healthcheck가 통과되어야 app 컨테이너 시작
+  #     ftp:
+  #       condition: service_started # ftp 컨테이너가 시작되어야 app 컨테이너 시작
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: demo
+  #     EAI_DB_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
+  #     EAI_DB_USERNAME: DEMOUSER
+  #     EAI_DB_PASSWORD: LocalDemo_App1
+  #     EAI_FTP_HOST: ftp
+  #     EAI_FTP_PORT: "21"
+  #     EAI_FTP_USERNAME: demoftp
+  #     EAI_FTP_PASSWORD: demoftp123
+  #     EAI_FTP_PATH: /home/demoftp
+  #     EAI_APPLICANT_KEY: DEMO001
+  #     EAI_APPLICANT_NAME: 진경
+  #     EAI_APPLICANT_PHONE: "010-0000-0000"
+  #   ports:
+  #     - "8080:8080"

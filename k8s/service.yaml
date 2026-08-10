@@ -1,11 +1,23 @@
-apiVersion: v1
+apiVersion: v1 # service는 core 그룹에 속하므로 v1
 kind: Service
 metadata:
   name: inspien-app
 spec:
-  type: NodePort
-  selector:
+  type: NodePort # service를 어떻게 노출할지 옵션
+  # NodePort: 클러스터 외부에서 접근 가능하도록, 노드의 특정 포트로 접근하면 service로 연결됨
+  # ClusterIP: 클러스터 내부에서만 접근 가능하도록, service 이름으로 접근 가능
+  # LoadBalancer: 클라우드 환경에서 외부 접근 가능하도록, 클라우드 제공 LB를 통해 접근 가능
+  selector: # service가 어떤 pod를 연결할지 고르는 기준, deployment의 template.metadata.labels와 동일해야 함
     app: inspien-app
   ports:
     - port: 8080
       targetPort: 8080
+
+
+# 클러스터 -> 쿠버네티스 시스템 전체 하나 (node 여러개 + 관리하는 control plane 등등 다 합쳐서)
+# minikube start -> minikube라는 이름의 클러스터 생성
+# 쿠버네티스 == REST API 서버 -> 이 API 서버가 다루는 리소스 종류(pod, service, deployment 등등)가 많아서 관련된 것들 끼리 묶어서 그룹으로 관리 
+# 처음 나왔을 때 있던 원조 리소스 -> core 그룹, v1
+# 나중에 추가된걸 따로 그룹면 붙임 
+
+# 리소스 == 어떤 필드를 가진 데이터 스키마 , 여러 리소스 타입이 있다 == 여러 테이블이 있다 
