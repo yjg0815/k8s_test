@@ -59,7 +59,8 @@ spec:
     spec:
       containers:
         - name: inspien-app
-          image: inspien-app:v1   
+          #image: inspien-app:v1
+          image: ghcr.io/yjg0815/inspien:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
