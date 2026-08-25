@@ -36,6 +36,9 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
+      - name: debug connectivity
+        run: curl -vk --max-time 15 https://3.36.128.4:6443/version
+
       - run: kubectl apply -f k8s/deployment.yaml --validate=false
 
       - run: kubectl set image deployment/inspien-app inspien-app=ghcr.io/${{ github.repository }}:${{ github.sha }}
