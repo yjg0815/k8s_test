@@ -36,6 +36,6 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
-      - run: kubectl apply -f k8s/deployment.yaml
+      - run: kubectl apply -f k8s/deployment.yaml --validate=false
 
       - run: kubectl set image deployment/inspien-app inspien-app=ghcr.io/${{ github.repository }}:${{ github.sha }}
