@@ -1,9 +1,54 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: inspien-app
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: inspien-app
+#   template:
+#     metadata:
+#       labels:
+#         app: inspien-app
+#     spec:
+#       containers:
+#         - name: inspien-app
+#           image: inspien-app:latest
+#           imagePullPolicy: Never   # 로컬에 minikube image load로 올린 이미지를 그대로 씀 (레지스트리 pull 시도 안 함)
+#           ports:
+#             - containerPort: 8080
+#           env:
+#             # docker compose로 띄워둔 oracle/ftp를 그대로 재사용.
+#             # host.minikube.internal은 minikube가 자동으로 제공하는, 호스트 머신을 가리키는 DNS 이름.
+#             - name: EAI_DB_URL
+#               value: jdbc:oracle:thin:@host.minikube.internal:1521/FREEPDB1
+#             - name: EAI_DB_USERNAME
+#               value: DEMOUSER
+#             - name: EAI_DB_PASSWORD
+#               value: LocalDemo_App1
+#             - name: EAI_FTP_HOST
+#               value: host.minikube.internal
+#             - name: EAI_FTP_PORT
+#               value: "21"
+#             - name: EAI_FTP_USERNAME
+#               value: demoftp
+#             - name: EAI_FTP_PASSWORD
+#               value: demoftp123
+#             - name: EAI_FTP_PATH
+#               value: /home/demoftp
+#             - name: EAI_APPLICANT_KEY
+#               value: DEMO001
+#             - name: EAI_APPLICANT_NAME
+#               value: 진경
+#             - name: EAI_APPLICANT_PHONE
+#               value: "010-0000-0000"
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: inspien-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: inspien-app
@@ -14,13 +59,16 @@ spec:
     spec:
       containers:
         - name: inspien-app
-          image: inspien-app:latest
-          imagePullPolicy: Never   # 로컬에 minikube image load로 올린 이미지를 그대로 씀 (레지스트리 pull 시도 안 함)
+          image: inspien-app:v1   
+          imagePullPolicy: Never
           ports:
             - containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
           env:
-            # docker compose로 띄워둔 oracle/ftp를 그대로 재사용.
-            # host.minikube.internal은 minikube가 자동으로 제공하는, 호스트 머신을 가리키는 DNS 이름.
             - name: EAI_DB_URL
               value: jdbc:oracle:thin:@host.minikube.internal:1521/FREEPDB1
             - name: EAI_DB_USERNAME
