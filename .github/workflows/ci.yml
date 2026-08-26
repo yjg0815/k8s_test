@@ -37,7 +37,7 @@ jobs:
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
       - name: debug connectivity
-        run: curl -vk --max-time 15 https://3.36.128.4:6443/version
+        run: curl -vk --max-time 15 https://15.164.218.233:6443/version
 
       - run: kubectl apply -f k8s/deployment.yaml --validate=false
 
